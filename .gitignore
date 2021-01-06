@@ -1,7 +1,6 @@
 .DS_Store
 node_modules
 /dist
-/src/utils/secret.js
 
 
 # local env files
@@ -22,3 +21,4 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+src/utils/secret,js
