@@ -31,7 +31,7 @@ export default {
       alert("getLocation");
     },
     loadProperties: async function () {
-      const resp = await axios.get("http://localhost:3000/properties");
+      const resp = await axios.get("http://localhost:3000/api/properties");
       if (resp.data) {
         this.properties = resp.data;
         console.log(this.properties);
