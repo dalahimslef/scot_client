@@ -10,7 +10,7 @@
 <script>
 import { initGoogleMaps } from "../utils/gmaps.js";
 import axios from "axios";
-import MarkerClusterer from '@googlemaps/markerclustererplus';
+import MarkerClusterer from "@googlemaps/markerclustererplus";
 
 export default {
   name: "HelloWorld",
@@ -30,11 +30,35 @@ export default {
     getLocation: function () {
       alert("getLocation");
     },
-    loadProperties: async function () {
-      const resp = await axios.get("http://localhost:3000/api/properties");
+    getBounds: function () {
+      const bounds = {
+        ne: { lat: 200, lng: 200 },
+        sw: { lat: -200, lng: -200 },
+      };
+      const mapBounds = this.map.getBounds();
+      if (mapBounds) {
+        bounds.ne.lat = mapBounds.getNorthEast().lat();
+        bounds.ne.lng = mapBounds.getNorthEast().lng();
+        bounds.sw.lat = mapBounds.getSouthWest().lat();
+        bounds.sw.lng = mapBounds.getSouthWest().lng();
+      }
+      return bounds;
+    },
+    handleBoundsChanged: async function () {
+      const bounds = this.getBounds();
+      this.getPropertiyCount(bounds);
+      this.loadProperties(bounds);
+    },
+    getPropertiyCount: async function (bounds) {
+      const resp = await axios.get("http://localhost:3000/api/properties/count?ne_lat="+bounds.ne.lat+"&ne_lng="+bounds.ne.lng+"&sw_lat="+bounds.sw.lat+"&sw_lng="+bounds.sw.lng);
+      if (resp.data) {
+        console.log(resp.data);
+      }
+    },
+    loadProperties: async function (bounds) {
+      const resp = await axios.get("http://localhost:3000/api/properties?ne_lat="+bounds.ne.lat+"&ne_lng="+bounds.ne.lng+"&sw_lat="+bounds.sw.lat+"&sw_lng="+bounds.sw.lng);
       if (resp.data) {
         this.properties = resp.data;
-        console.log(this.properties);
 
         const markers = this.properties.map((property) => {
           return new this.ggl.maps.Marker({
@@ -66,8 +90,14 @@ export default {
       });
       // The marker, positioned at Uluru
       // new this.ggl.maps.Marker({ position: uluru, map: map });
+      //debugger;// eslint-disable-line no-debugger
+      // console.log(this.map.getBounds());//
 
-      this.loadProperties();
+      this.ggl.maps.event.addListener(
+        this.map,
+        "bounds_changed",
+        this.handleBoundsChanged
+      );
     } catch (error) {
       // eslint-disable-next-line no-debugger
       console.error(error);
