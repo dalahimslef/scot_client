@@ -1,120 +1,73 @@
 <template>
   <div>
     <v-navigation-drawer permanent>
-      <!--v-list-item>
-        <v-list-item-content>
-          <v-list-item-title class="title"> Application </v-list-item-title>
-          <v-list-item-subtitle> subtext </v-list-item-subtitle>
-        </v-list-item-content>
-      </v-list-item>
-
-      <v-divider></v-divider-->
-
       <v-list dense nav>
-        <v-list-item link @click.stop="dialog = true">
-          <v-list-item-icon>
-            <v-icon>mdi-home</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title>Type</v-list-item-title>
-            <v-list-item-subtitle>House</v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-
-        <v-list-item link>
-          <v-list-item-icon>
-            <v-icon>mdi-currency-btc</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title>Price (NOK)</v-list-item-title>
-            <v-list-item-subtitle>0 - 10,000,000</v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-
-        <v-list-item link>
-          <v-list-item-icon>
-            <v-icon>mdi-format-page-break</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title>House size (m2)</v-list-item-title>
-            <v-list-item-subtitle>0 - 1000</v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-
-        <v-list-item link>
-          <v-list-item-icon>
-            <v-icon>mdi-pine-tree</v-icon>
-          </v-list-item-icon>
-          <v-list-item-content>
-            <v-list-item-title>Plot size (mål)</v-list-item-title>
-            <v-list-item-subtitle>0 - 10</v-list-item-subtitle>
-          </v-list-item-content>
-        </v-list-item>
-
-        <!--v-list-item v-for="item in items" :key="item.title" link>
-          <v-list-item-icon>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-item-icon>
-
-          <v-list-item-content>
-            <v-list-item-title>{{ item.title }}</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item-->
+        <DialogOpener
+          :icon="'mdi-home'"
+          :title="'Type'"
+          :subtitle="'House'"
+          v-model="type_dialog"
+          @dialog-opened="openTypeDialog"
+        />
+        <DialogOpener
+          :icon="'mdi-currency-btc'"
+          :title="'Price (NOK)'"
+          :subtitle="'0 - 10,000,000'"
+          v-model="price_range_dialog"
+        />
+        <DialogOpener
+          :icon="'mdi-format-page-break'"
+          :title="'House size (m2)'"
+          :subtitle="'0 - 1000'"
+          v-model="sqm_range_dialog"
+        />
+        <DialogOpener
+          :icon="'mdi-pine-tree'"
+          :title="'Plot size (mål)'"
+          :subtitle="'0 - 10'"
+          v-model="plot_size_range_dialog"
+        />
       </v-list>
     </v-navigation-drawer>
 
     <div id="map" style="height: 100%"></div>
 
-    <template>
-  <v-row justify="center">
-    <v-dialog
-      v-model="dialog"
-      persistent
-      max-width="600px"
-    >
-      <v-card>
-        <v-card-title>
-          <span class="headline">Price range</span>
-        </v-card-title>
-        <v-card-text>
-          <v-container fluid style="padding-top:50px;">
-    <v-row>
-      <v-col cols="12">
-        <v-range-slider
+    <FormDialog :header="'Property type'" v-model="type_dialog">
+      <v-range-slider
         label="NOK"
-          v-model="value"
-          value="30"
-      thumb-label="always"
-        ></v-range-slider>
-      </v-col>
-    </v-row>
-  </v-container>
-          <small>*indicates required field</small>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn
-            color="blue darken-1"
-            text
-            @click="dialog = false"
-          >
-            Close
-          </v-btn>
-          <v-btn
-            color="blue darken-1"
-            text
-            @click="dialog = false"
-          >
-            Save
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </v-row>
-</template>
-  </div>
+        v-model="value"
+        value="30"
+        thumb-label="always"
+      ></v-range-slider>
+    </FormDialog>
 
-  
+    <FormDialog :header="'Price'" v-model="price_range_dialog">
+      <v-range-slider
+        label="NOK"
+        v-model="price_range"
+        value="30"
+        thumb-label="always"
+      ></v-range-slider>
+    </FormDialog>
+
+    <FormDialog :header="'Size'" v-model="sqm_range_dialog">
+      <v-range-slider
+        label="m2"
+        v-model="sqm_range"
+        value="30"
+        thumb-label="always"
+      ></v-range-slider>
+    </FormDialog>
+
+    <FormDialog :header="'Plot size'" v-model="plot_size_range_dialog">
+      <v-range-slider
+        label="Acres"
+        v-model="plot_size_range"
+        value="30"
+        thumb-label="always"
+      ></v-range-slider>
+    </FormDialog>
+  </div>
 </template>
 
 <script>
@@ -122,8 +75,15 @@
 import axios from "axios";
 import MarkerClusterer from "@googlemaps/markerclustererplus";
 
+import DialogOpener from "./components/Map/DialogOpener";
+import FormDialog from "./components/Map/FormDialog";
+
 export default {
-  name: "HelloWorld",
+  name: "Map",
+  components: {
+    DialogOpener,
+    FormDialog,
+  },
   data: function () {
     return {
       ggl: undefined,
@@ -136,14 +96,24 @@ export default {
         { title: "About", icon: "mdi-help-box" },
       ],
       right: null,
-      dialog:false,
+      type_dialog: false,
+      type: "house",
+
+      price_range_dialog: false,
+      price_range: [0, 10000000],
+
+      sqm_range_dialog: false,
+      sqm_range: [0, 1000],
+
+      plot_size_range_dialog: false,
+      plot_size_range: [0, 10000],
     };
   },
-  props: {
-    msg: String,
-    google_map: null,
-  },
+  props: ["value"],
   methods: {
+    openTypeDialog: function(){
+alert('test');
+    },
     getBounds: function () {
       const bounds = {
         ne: { lat: 200, lng: 200 },
