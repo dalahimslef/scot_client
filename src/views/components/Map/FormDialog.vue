@@ -26,12 +26,12 @@
             text
             @click="closeDialog"
           >
-            Close
+            Cancel
           </v-btn>
           <v-btn
             color="blue darken-1"
             text
-            @click="closeDialog"
+            @click="saveSetting"
           >
             Save
           </v-btn>
@@ -53,13 +53,17 @@ export default {
         return this.value
       },
       set (value) {
-         this.$emit('input', value)
+         this.$emit('input', value);
       }
     }
   },
   methods:{
     closeDialog(){
       this.show = false;
+    },
+    saveSetting(){
+      this.$emit('save_setting', true);
+      this.closeDialog();
     }
   }
 }
